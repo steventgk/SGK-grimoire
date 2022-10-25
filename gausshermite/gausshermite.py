@@ -1,6 +1,15 @@
 import numpy as np
 import scipy
 
+__author__ = "Steven Gough-Kelly"
+__copyright__ = "Copyright 2022, UCLan Galaxy Dynamics"
+__credits__ = ["Steven Gough-Kelly", "Victor P. Debattista", "Stuart R. Anderson", "Ortwin E. Gerhard"]
+__license__ = "MIT"
+__version__ = "1.0.1"
+__maintainer__ = "Steven Gough-Kelly"
+__email__ = "sgoughkelly@gmail.com"
+__status__ = "Production"
+
 def Gauss_Hermite(w, n):
     """
     Return the normalised Gauss Hermite function of order n, weights w

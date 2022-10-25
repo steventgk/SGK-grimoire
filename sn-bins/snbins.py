@@ -1,5 +1,14 @@
 import numpy as np
 
+__author__ = "Steven Gough-Kelly"
+__copyright__ = "Copyright 2022, UCLan Galaxy Dynamics"
+__credits__ = ["Steven Gough-Kelly"]
+__license__ = "MIT"
+__version__ = "1.0.1"
+__maintainer__ = "Steven Gough-Kelly"
+__email__ = "sgoughkelly@gmail.com"
+__status__ = "Production"
+
 def sn_bins(var, n, order='asc'):
     """
     Defines bins with equal 'n' in each bin. Useful for sparse data. Order

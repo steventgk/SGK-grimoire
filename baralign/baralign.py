@@ -1,6 +1,15 @@
 import numpy as np
 import pynbody as pb
 
+__author__ = "Steven Gough-Kelly"
+__copyright__ = "Copyright 2022, UCLan Galaxy Dynamics"
+__credits__ = ["Steven Gough-Kelly", "Victor P. Debattista", "Stuart R. Anderson"]
+__license__ = "MIT"
+__version__ = "1.0.1"
+__maintainer__ = "Steven Gough-Kelly"
+__email__ = "sgoughkelly@gmail.com"
+__status__ = "Production"
+
 def bar_align(galaxy, rbar, barfrac = 0.5, zlim=0.5, log=False):
     """
     Aligns the bar of pynbody galaxy simulation with the x-axis assuming the
