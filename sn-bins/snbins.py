@@ -27,7 +27,8 @@ def sn_bins(var, n, order='asc'):
         'dec' mode will have n_i <= n
     Returns
     -------
-    None
+    bins : the bin edges
+    bin_cents : the bin centers
     """
     if order=='asc':
         sorted = np.argsort(var)
