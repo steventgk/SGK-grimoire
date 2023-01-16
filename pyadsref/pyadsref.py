@@ -3,9 +3,7 @@ from pybtex.database import parse_file
 from pybtex.database import parse_string
 
 import requests
-
 from bs4 import BeautifulSoup
-
 import string
 
 try:
@@ -41,7 +39,7 @@ def ads_lookup(doi):
     adswebadd = 'https://ui.adsabs.harvard.edu/abs/'
     expcite = '/exportcitation'
 
-    doi = adswebadd + doi + expcite
+    url = adswebadd + doi + expcite
 
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -122,14 +120,14 @@ def sort_db(db):
     keys = list(db.entries.keys())
     keys.sort()
 
-    sortout = parse_string(allrefs.entries[keys[0]].to_string('bibtex'),
+    sortout = parse_string(db.entries[keys[0]].to_string('bibtex'),
                           'bibtex')
     for key in keys[1:]:
         sortout.add_entry(key,db.entries[key])
 
     return sortout
 
-def add_new_entry(db,doi):
+def add_new_entry(db,doi,overwrite=False):
     """
     Appends a new entry to a  pybtex BibliographyData object from a paper doi.
 
@@ -144,12 +142,35 @@ def add_new_entry(db,doi):
     output db : sorted BibliographyData object of db with new entry
     """
 
+    dbkeys = list(db.entries.keys())
     new_entry = gen_ref(ads_lookup(doi))
-    # check db for key and figure out repeats.
-    nkey = list(newent.entries.keys())[0]
-    db.add_entry(nkey,newent.entries[nkey])
+    nkey = list(new_entry.entries.keys())[0]
+
+    if nkey in dbkeys:
+        # Check if different paper same year!
+        # if comp_months:
+            # set a/b
+        if overwrite:
+            db = remove_entry(db,nkey)
+            db.add_entry(nkey,new_entry.entries[nkey])
+        else:
+            print('Key already in Bibliography. To overwrite, set overwrite=True.')
+    else:
+        db.add_entry(nkey,new_entry.entries[nkey])
 
     return sort_db(db)
+
+def remove_entry(db,key):
+    keys = list(db.entries.keys())
+    keys.sort()
+    keys.remove(key)
+
+    sortout = parse_string(db.entries[keys[0]].to_string('bibtex'),
+                          'bibtex')
+    for key in keys[1:]:
+        sortout.add_entry(key,db.entries[key])
+
+    return sortout
 
 def save_bib(db,filename='./db.bib',clipboard=False):
     """
@@ -176,3 +197,18 @@ def save_bib(db,filename='./db.bib',clipboard=False):
         pyperclip.copy(db.to_string('bibtex'))
 
     return None
+
+def load_bib(filename='./db.bib'):
+    """
+    Creates a BibliographyData object db from a .bib file.
+
+    Parameters
+    ----------
+    filename : string
+        The location and filename of the bibtex file.
+    Returns
+    -------
+    BibliographyData pybtex data object
+    """
+
+    return parse_file(filename, bib_format='bibtex')
