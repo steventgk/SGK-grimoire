@@ -18,9 +18,7 @@ __status__ = "Production"
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def starlynk_slack(webhook_url: str = config["webhook_url"], \
-                 channel: str = config["channel"], \
-                 user: str = config["user"]):
+def starlynk_slack(webhook_url: str, channel: str, user: str):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
@@ -95,10 +93,7 @@ def starlynk_slack(webhook_url: str = config["webhook_url"], \
 
     return decorator_sender
 
-def starlynk_slack_notify(message: List[str] = [], \
-                 webhook_url: str = config["webhook_url"], \
-                 channel: str = config["channel"], \
-                 user: str = config["user"]):
+def starlynk_slack_notify(message: List[str] = [], webhook_url: str, channel: str, user: str):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
