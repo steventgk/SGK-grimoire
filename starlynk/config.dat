@@ -1,0 +1,5 @@
+{
+    "webhook_url":"https://hooks.slack.com/services/XXX",
+    "channel":"#job-notifications",
+    "user":"<@XxXxXxXxXxX>"
+}

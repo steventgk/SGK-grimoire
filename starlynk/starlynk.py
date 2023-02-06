@@ -6,6 +6,8 @@ import functools
 import json
 import socket
 import requests
+import importlib.resources as pkg_resources
+import pkgutil
 
 __author__ = "Steven Gough-Kelly"
 __copyright__ = "Copyright 2023"
@@ -17,8 +19,11 @@ __email__ = "sgoughkelly@gmail.com"
 __status__ = "Production"
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+config = json.loads(pkgutil.get_data(__name__, "config.dat").decode('utf8'))
 
-def starlynk_slack(webhook_url: str, channel: str, user: str):
+def starlynk_slack(webhook_url: str = config["webhook_url"], \
+                 channel: str = config["channel"], \
+                 user: str = config["user"]):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
@@ -93,7 +98,10 @@ def starlynk_slack(webhook_url: str, channel: str, user: str):
 
     return decorator_sender
 
-def starlynk_slack_notify(webhook_url: str, channel: str, user: str, message: List[str] = []):
+def starlynk_slack_notify(message: List[str] = [], \
+                 webhook_url: str = config["webhook_url"], \
+                 channel: str = config["channel"], \
+                 user: str = config["user"]):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
