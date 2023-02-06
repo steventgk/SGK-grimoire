@@ -6,7 +6,6 @@ import functools
 import json
 import socket
 import requests
-import importlib.resources as pkg_resources
 import pkgutil
 
 __author__ = "Steven Gough-Kelly"
