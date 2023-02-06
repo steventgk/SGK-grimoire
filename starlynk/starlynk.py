@@ -93,7 +93,7 @@ def starlynk_slack(webhook_url: str, channel: str, user: str):
 
     return decorator_sender
 
-def starlynk_slack_notify(message: List[str] = [], webhook_url: str, channel: str, user: str):
+def starlynk_slack_notify(webhook_url: str, channel: str, user: str, message: List[str] = []):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
