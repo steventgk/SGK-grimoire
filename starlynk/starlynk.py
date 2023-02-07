@@ -58,7 +58,7 @@ def starlynk_slack(webhook_url: str = config["webhook_url"], \
                 end_time = datetime.datetime.now()
                 elapsed_time = end_time - start_time
                 
-                contents = ['*%s, your job has started 🎉*' % user,
+                contents = ['*%s, your job has finished 🎉*' % user,
                             '*Machine name:* _%s_' % host_name,
                             '*Function call:* _%s_' % func_name,
                             '*Starting date:* _%s_' % start_time.strftime(DATE_FORMAT),
@@ -79,7 +79,7 @@ def starlynk_slack(webhook_url: str = config["webhook_url"], \
             except Exception as ex:
                 end_time = datetime.datetime.now()
                 elapsed_time = end_time - start_time
-                contents = ['*%s, your job has started ☠️*' % user,
+                contents = ['*%s, your job has Crashed ☠️*' % user,
                             '*Machine name:* _%s_' % host_name,
                             '*Function call:* _%s_' % func_name,
                             '*Starting date:* _%s_' % start_time.strftime(DATE_FORMAT),
