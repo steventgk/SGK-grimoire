@@ -102,9 +102,7 @@ def starlynk_slack_notify(message: List[str] = [], \
                  channel: str = config["channel"], \
                  user: str = config["user"]):
     """
-    Slack sender wrapper: execute func, send a Slack notification with the end status
-    (sucessfully finished or crashed) at the end. Also send a Slack notification before
-    executing func.
+    Send a Slack notification with a message
     `message`: List[str]
         Message to display on slack notification as a list of strings (lines)
     `webhook_url`: str
