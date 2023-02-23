@@ -24,7 +24,9 @@ def sn_bins(var, n, order='asc'):
     order : str
         Takes values of 'asc' or 'dec' to set direction in which you define
         bins. In 'asc' mode the final bin will have n_i <= n. The first bin in
-        'dec' mode will have n_i <= n
+        'dec' mode will have n_i <= n.
+        If 'ValueError: The smallest edge difference is numerically 0.' is
+        raised in binned_statistic try changing order.
     Returns
     -------
     bins : the bin edges
