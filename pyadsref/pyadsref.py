@@ -212,3 +212,32 @@ def load_bib(filename='./db.bib'):
     """
 
     return parse_file(filename, bib_format='bibtex')
+
+def merg_dbs(db1,db2):
+    """
+    Merge two BibliographyData objects by comparing keys
+    and output a new object with sorted keys.
+
+    Parameters
+    ----------
+    db1 : BibliographyData object
+        The first Bibliography database to merge.
+    db2 : BibliographyData object
+        The second Bibliography database to merge.
+    Returns
+    -------
+    sorted db : BibliographyData object.
+    """
+
+    keys1 = list(db1.entries.keys())
+    keys1.sort()
+    
+    keys2 = list(db2.entries.keys())
+    keys2.sort()
+    
+    diff = list(set(keys2)-set(keys1))
+    
+    for key in diff:
+        db1.add_entry(key,db2.entries[key])
+        
+    return sort_db(db1)
