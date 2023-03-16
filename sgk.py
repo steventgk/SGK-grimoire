@@ -302,7 +302,7 @@ def plot_linint(x,y,intercept,axis,plot_axis,pout=False,**plt_kwargs):
 
     return None
 
-def sn_bins(var, n, order='asc'):
+def sn_bins(var, n, w=None, cent='avg', order='asc', leftover='join'):
     """
     Defines bins with equal 'n' in each bin. Useful for sparse data. Order
     allows for the control of direction of definition of the bins as either the
@@ -314,10 +314,19 @@ def sn_bins(var, n, order='asc'):
         Variable to be binned.
     n : int
         Number of elements to put in a bin
+    w : list or numpy arrary of int or float
+        Weight of each element in var. Used only when cent=='avg'
+    cent : str
+        Takes values of 'avg' or 'mid' to chose definition of bin centers.
+        Either weighted average of each bin or midpoint between bins.
     order : str
         Takes values of 'asc' or 'dec' to set direction in which you define
         bins. In 'asc' mode the final bin will have n_i <= n. The first bin in
-        'dec' mode will have n_i <= n
+        'dec' mode will have n_i <= n.
+        If 'ValueError: The smallest edge difference is numerically 0.' is
+        raised in binned_statistic try changing order.
+    leftover: str
+        Takes value of 'join' to join final bin which has len(elements) < n.
     Returns
     -------
     bins : the bin edges
@@ -325,12 +334,27 @@ def sn_bins(var, n, order='asc'):
     """
     if order=='asc':
         sorted = np.argsort(var)
-        bins=np.append(var[sorted[0::n]],var[sorted[-1]])
+        bins = var[sorted[::n]]
+        if leftover=='join':
+            bins = np.append(bins[:-1],var[sorted[-1]])
+        else:
+            bins = np.append(bins,var[sorted[-1]])
     elif order=='dec':
-        sorted = np.argsort(var)#[::-1]
-        bins=np.append(var[sorted[-1]],var[sorted[-n::-n]])
-        bins=np.append(bins,var[sorted[0]])[::-1]
-    bin_cents = bins[:-1] + np.diff(bins)/2
+        sorted = np.argsort(var)[::-1]
+        bins = var[sorted[::n]]
+        if leftover=='join':
+            bins = np.append(bins[:-1],var[sorted[-1]])[::-1]
+        else:
+            bins = np.append(bins,var[sorted[-1]])[::-1]
+        
+    if cent=='avg':
+        if w is None:
+            w = np.ones(len(var))
+        bin_cents, _, _ = stats.binned_statistic(var,w*var,statistic='sum',bins=bins)
+        counts, _, _ = stats.binned_statistic(var,w,statistic='sum',bins=bins)
+        bin_cents = bin_cents/counts
+    if cent=='mid':
+        bin_cents = bins[:-1] + np.diff(bins)/2
 
     return bins, bin_cents
 
