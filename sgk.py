@@ -4,6 +4,7 @@ import scipy
 import matplotlib.pyplot as plt
 from shapely.geometry import LineString
 from scipy import signal
+from scipy import stats
 from scipy.interpolate import CubicSpline, griddata
 from scipy.ndimage import gaussian_filter
 
