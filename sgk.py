@@ -359,6 +359,58 @@ def sn_bins(var, n, w=None, cent='avg', order='asc', leftover='join'):
 
     return bins, bin_cents
 
+def lin_sn_bins(var,nmin,range=None,mode='min'):
+    """
+    Defines linear bins with a minimum 'nmin' elements in each bin using optimize.
+    Two modes allow for high resolution (max number of bins) or minimum number of
+    bins possible (default).
+
+    Parameters
+    ----------
+    var : list or numpy arrary of int or float
+        Variable to be binned.
+    nmin : int
+        Minimum number of elements required for each bin
+    range : tuple or list of two elements.
+        The Min and Max values to determine bins over.
+    mode : str
+        Takes values of min or max to allow for the minimum number of bins
+        that fits the nmin criteria or the maximum possible to still ensure
+        nmin in each bin.
+    Returns
+    -------
+    nbins : min/max number of bins possible to ensure each bin has nmin elements.
+    """
+    if range is None:
+        range = (np.min(var),np.max(var))
+        
+    def sn_min(nbins,var,nmin,range):
+        count, edges = np.histogram(var,range=arange,bins=int(nbins))
+        if np.nanmin(count)>nmin:
+            return (1/(np.diff(edges)[0]))
+        elif np.nanmin(count)==nmin:
+            return -1e-10
+        else:
+            return -(1/(np.diff(edges)[0]))
+    
+    def sn_max(nbins,var,nmin,range):
+        count, edges = np.histogram(var,range=arange,bins=int(nbins))
+        if np.nanmin(count)<nmin:
+            return (1/(np.diff(edges)[0]))
+        elif np.nanmin(count)==nmin:
+            return -1e-10
+        else:
+            return -(1/(np.diff(edges)[0]))
+    
+    if mode=='min':
+        sol = optimize.root_scalar(sn_min, args=(var,nmin,range),
+                                    bracket=[1, len(var)], method='brentq')
+    if mode=='max':
+        sol = optimize.root_scalar(sn_max, args=(var,nmin,range),
+                                    bracket=[1, len(var)], method='brentq')
+        
+    return int(sol.root)
+
 def buttersmooth(x, y, order=2, crit=None, interp=True, cs_np=1000,log=True):
 
     """
@@ -506,6 +558,3 @@ def unsharp(
         return smoothed, unsharp
     else:
         return unsharp
-
-# Example
-# unsharp(fill_holes(image))
