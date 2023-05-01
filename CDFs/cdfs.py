@@ -35,7 +35,7 @@ def CDF(arr,bins=10_000,rng=None, norm=True):
     if type(rng)==type(None):
         rng = (np.nanmin(arr),np.nanmax(arr))
 
-    values, base = np.histogram(arr, bins=10000,range=rng)
+    values, base = np.histogram(arr, bins=bins,range=rng)
     cumulative = np.cumsum(values)
     if norm:
         cumulative = cumulative/max(cumulative)
