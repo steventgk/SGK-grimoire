@@ -8,6 +8,7 @@ from scipy import stats
 from scipy.interpolate import CubicSpline, griddata
 from scipy.ndimage import gaussian_filter
 from fast_histogram import histogram2d
+from scipy import optimize
 import matplotlib.colors as colors
 
 __author__ = "Steven Gough-Kelly"
