@@ -388,7 +388,7 @@ def lin_sn_bins(var,nmin,range=None,mode='min'):
         range = (np.min(var),np.max(var))
         
     def sn_min(nbins,var,nmin,range):
-        count, edges = np.histogram(var,range=arange,bins=int(nbins))
+        count, edges = np.histogram(var,range=range,bins=int(nbins))
         if np.nanmin(count)>nmin:
             return (1/(np.diff(edges)[0]))
         elif np.nanmin(count)==nmin:
@@ -397,7 +397,7 @@ def lin_sn_bins(var,nmin,range=None,mode='min'):
             return -(1/(np.diff(edges)[0]))
     
     def sn_max(nbins,var,nmin,range):
-        count, edges = np.histogram(var,range=arange,bins=int(nbins))
+        count, edges = np.histogram(var,range=range,bins=int(nbins))
         if np.nanmin(count)<nmin:
             return (1/(np.diff(edges)[0]))
         elif np.nanmin(count)==nmin:
