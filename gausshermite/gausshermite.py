@@ -46,10 +46,13 @@ def GaussHermiteMoment(v, n):
     -------
     float Gauss Hermite moment of order n for input distribution.
     """
-    v = v[np.isfinite(v)] # remove nans&inf
+
     if len(v) <= 1: # Added SL speed+error catch when used in binned_statistic
         return np.nan
+    vc = v[np.isfinite(v)] # remove nans&inf
+    if len(vc) <= 1: 
+        return np.nan
 
-    v_dash = (v - np.mean(v))/np.std(v) # center on 0, norm width to 1sig
+    v_dash = (vc - np.mean(vc))/np.std(vc) # center on 0, norm width to 1sig
     hn = np.sum(Gauss_Hermite(v_dash, n))
-    return np.sqrt(4*np.pi) * hn / len(v)
+    return np.sqrt(4*np.pi) * hn / len(vc)
