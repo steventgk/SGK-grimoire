@@ -6,17 +6,19 @@ __author__ = "Steven Gough-Kelly"
 __copyright__ = "Copyright 2022, UCLan Galaxy Dynamics"
 __credits__ = ["Steven Gough-Kelly"]
 __license__ = "MIT"
-__version__ = "1.2.1"
+__version__ = "1.3.1"
 __maintainer__ = "Steven Gough-Kelly"
 __email__ = "sgoughkelly@gmail.com"
 __status__ = "Production"
 
-def sn_bins(var, n, w=None, cent='avg', order='asc', leftover='join'):
+def sn_bins(var, n, w=None, cent='avg', order='asc', leftover='join', rtn_xerr=False):
     """
-    Defines bins with equal 'n' in each bin. Useful for sparse data. Order
-    allows for the control of direction of definition of the bins as either the
-    the last or first bin will have less than the target n. If leftover is join
-    then this bin gets joined to the previous creating a bin with > n.
+    Defines bin edges with equal 'n' in each bin (i.e. where you can assume 
+    noise = sqrt(n)). Useful for none uniform distribution of data. Order 
+    controls the direction bin definition as either the last or first bin 
+    will have less than the target n. Leftover controls the handling of 
+    these remaining elements. Function also returns bin centers.
+    This allows for quick easy integration into binned_statistic and plotting.
 
     Parameters
     ----------
@@ -30,43 +32,103 @@ def sn_bins(var, n, w=None, cent='avg', order='asc', leftover='join'):
         Takes values of 'avg' or 'mid' to chose definition of bin centers.
         Either weighted average of each bin or midpoint between bins.
     order : str
-        Takes values of 'asc' or 'dec' to set direction in which you define
+        Takes values of 'asc' or 'des' to set direction in which you define
         bins. In 'asc' mode the final bin will have n_i <= n. The first bin in
-        'dec' mode will have n_i <= n.
+        'des' mode will have n_i <= n.
         If 'ValueError: The smallest edge difference is numerically 0.' is
         raised in binned_statistic try changing order.
-    leftover: str
-        Takes value of 'join' to join final bin which has len(elements) < n.
+    leftover : str
+        Takes value of 'join' to join final bin which has len(elements) < n
+        to the penultimate bin to create a combined bin with len(elements) > n
+        or 'drop' to exclude the bin with len(elements) < n. Any other value
+        will default to leaving the final bin with len(elements) < n in 
+        the output.
+    rtn_xerr : bool
+        Flag to return the uncertainty on the bin_cents when using cent='avg'.
     Returns
     -------
-    bins : the bin edges
-    bin_cents : the bin centers
+    bin_edges : numpy array
+        the bin edges
+    bin_cents : numpy array
+        the bin centers
+    bin_xerr : numpy array
+        (optional) the uncertaintiy on the bin center average
     """
-    if order=='asc':
+
+    if order not in ['asc','des']:
+        order = 'asc'
+        raise Exception("Use only 'asc' or 'des' values for order. Assuming 'asc'.")
+
+    # Create bin arrays
+
+    # First Catch Case - perfectly divisible
+    # defaults order as would be equivient
+    # sets leftover to None
+    if len(var)%n == 0:
+        order = 'asc'
+        leftover = None
+
         sorted = np.argsort(var)
-        bins = var[sorted[::n]]
-        if leftover=='join':
-            bins = np.append(bins[:-1],var[sorted[-1]])
-        else:
-            bins = np.append(bins,var[sorted[-1]])
-    elif order=='dec':
-        sorted = np.argsort(var)[::-1]
-        bins = var[sorted[::n]]
-        if leftover=='join':
-            bins = np.append(bins[:-1],var[sorted[-1]])[::-1]
-        else:
-            bins = np.append(bins,var[sorted[-1]])[::-1]
-        
-    if cent=='avg':
+        bin_edges = var[sorted[::n]]
+        bin_edges = np.append(bin_edges,var[sorted[-1]])
+    else:
+        # Second Catch Case - edge difference 0
+        # Can't have two bin edges that are the same value
+        # Has to default to 'join'
+        if len(var)%n == 1:
+            leftover = 'join'
+
+        #find length of remainder
+        l = len(var)%n
+
+        if order=='asc':
+            sorted = np.argsort(var)
+            tmp = sorted[:-l]
+            bin_edges = var[tmp[::n]]
+            if leftover=='join':
+                bin_edges = np.append(bin_edges,var[sorted[-1]])
+            elif leftover=='drop':
+                bin_edges = np.append(bin_edges,var[sorted[-l-1]])
+            else:
+                bin_edges = var[sorted[::n]]
+                bin_edges = np.append(bin_edges,var[sorted[-1]])
+
+        elif order=='des':
+            sorted = np.argsort(var)
+            tmp = sorted[l:]
+            bin_edges = var[tmp[::n]]
+            if leftover=='join':
+                bin_edges = np.append(var[sorted[0]],bin_edges[1:])
+                bin_edges = np.append(bin_edges, var[sorted[-1]])
+            elif leftover=='drop':
+                bin_edges = np.append(bin_edges, var[sorted[-1]])
+            else:
+                bin_edges = np.append(var[sorted[0]],bin_edges)
+                bin_edges = np.append(bin_edges, var[sorted[-1]])
+    
+    # Calculate Bin Centers
+
+    if cent not in ['avg','mid']:
+        cent = 'avg'
+        raise Exception("Use only 'avg' or 'mid' values for bin centers. Assuming 'avg'.")
+
+    if (cent=='avg'):
         if w is None:
             w = np.ones(len(var))
-        bin_cents, _, _ = stats.binned_statistic(var,w*var,statistic='sum',bins=bins)
-        counts, _, _ = stats.binned_statistic(var,w,statistic='sum',bins=bins)
+        bin_cents, _, _ = stats.binned_statistic(var,w*var,statistic='sum',bins=bin_edges)
+        counts, _, _ = stats.binned_statistic(var,w,statistic='sum',bins=bin_edges)
         bin_cents = bin_cents/counts
-    if cent=='mid':
-        bin_cents = bins[:-1] + np.diff(bins)/2
+        
+        if rtn_xerr:
+            bin_xsig, _, _ = stats.binned_statistic(var,var,statistic='std',bins=bin_edges)
+            nbin, _, _ = stats.binned_statistic(var,None,statistic='count',bins=bin_edges)
+            bin_xerr = bin_xsig/np.sqrt(nbin)
+            return bin_edges, bin_cents, bin_xerr
 
-    return bins, bin_cents
+    elif (cent=='mid'):
+        bin_cents = bin_edges[:-1] + np.diff(bin_edges)/2
+
+    return bin_edges, bin_cents
 
 def lin_sn_bins(var,nmin,range=None,mode='min'):
     """
