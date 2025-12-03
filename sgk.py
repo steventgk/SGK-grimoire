@@ -215,7 +215,7 @@ def Gauss_Hermite(w, n):
     """
     w = np.array(w)
     p = scipy.special.hermite(n, monic=False) #hermite poly1d obj
-    norm = np.sqrt((2**(n+1))*np.pi*np.math.factorial(n)) # N_n Eqn 3.1
+    norm = np.sqrt((2**(n+1))*np.pi*scipy.special.factorial(n)) # N_n Eqn 3.1
 
     return (p(w)/norm) * np.exp( -0.5 * w * w )
 
